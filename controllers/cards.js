@@ -30,6 +30,7 @@ module.exports.deleteCardById = (req, res) => {
     .orFail(() => {
       throw new Error('Карточка не найдена');
     })
+    .then((card) => res.send({ data: card }))
     .catch((err) => {
       if (err.message === 'Карточка не найдена') {
         res.status(404).send({ message: 'Карточка по указанному id не найдена' });
@@ -45,8 +46,20 @@ module.exports.likeCard = (req, res) => {
     { $addToSet: { likes: req.user._id } }, // добавить _id в массив, если его там нет
     { new: true },
   )
+    .orFail(() => {
+      throw new Error('Карточка не найдена');
+    })
     .then((card) => res.send({ data: card }))
-    .catch(() => res.status(500).send({ message: 'Данные не прошли валидацию.' }));
+    .catch((err) => {
+      if (err.message === 'Карточка не найдена') {
+        res.status(404).send({ message: 'Карточка по указанному id не найдена' });
+      } else if (err.name === 'ValidationError') {
+        const message = Object.values(err.errors).map((error) => error.message).join('; ');
+        res.status(400).send({ message });
+      } else {
+        res.status(500).send({ message: 'Произошла ошибка' });
+      }
+    });
 };
 
 module.exports.dislikeCard = (req, res) => {
@@ -55,6 +68,18 @@ module.exports.dislikeCard = (req, res) => {
     { $pull: { likes: req.user._id } }, // убрать _id из массива
     { new: true },
   )
+    .orFail(() => {
+      throw new Error('Карточка не найдена');
+    })
     .then((card) => res.send({ data: card }))
-    .catch(() => res.status(500).send({ message: 'Данные не прошли валидацию.' }));
+    .catch((err) => {
+      if (err.message === 'Карточка не найдена') {
+        res.status(404).send({ message: 'Карточка по указанному id не найдена' });
+      } else if (err.name === 'ValidationError') {
+        const message = Object.values(err.errors).map((error) => error.message).join('; ');
+        res.status(400).send({ message });
+      } else {
+        res.status(500).send({ message: 'Произошла ошибка' });
+      }
+    });
 };
