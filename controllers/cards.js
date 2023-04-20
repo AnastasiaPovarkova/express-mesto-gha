@@ -8,21 +8,35 @@ module.exports.getCards = (req, res) => {
 };
 
 module.exports.createCard = (req, res) => {
-  console.log('userId:', req.user._id);
   const { name, link } = req.body;
   const userId = req.user._id;
 
   Card.create({
-    name, link, owner: userId, likes: [],
+    name, link, owner: userId,
   })
-    .then((card) => res.send({ data: card }))
-    .catch(() => res.status(500).send({ message: 'Произошла ошибка' }));
+    .then((card) => res.status(201).send({ data: card }))
+    .catch((err) => {
+      if (err.name === 'ValidationError') {
+        const message = Object.values(err.errors).map((error) => error.message).join('; ');
+        res.status(400).send({ message });
+      } else {
+        res.status(500).send({ message: 'Произошла ошибка' });
+      }
+    });
 };
 
 module.exports.deleteCardById = (req, res) => {
   Card.findByIdAndRemove({ _id: req.params.cardId })
-    .then((card) => res.send({ data: card }))
-    .catch(() => res.status(500).send({ message: 'Произошла ошибка' }));
+    .orFail(() => {
+      throw new Error('Карточка не найдена');
+    })
+    .catch((err) => {
+      if (err.message === 'Карточка не найдена') {
+        res.status(404).send({ message: 'Карточка по указанному id не найдена' });
+      } else {
+        res.status(500).send({ message: 'Произошла ошибка' });
+      }
+    });
 };
 
 module.exports.likeCard = (req, res) => {
