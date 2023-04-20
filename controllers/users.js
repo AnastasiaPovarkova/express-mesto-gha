@@ -13,7 +13,6 @@ module.exports.getUserById = (req, res) => {
     })
     .then((user) => res.send({ data: user }))
     .catch((err) => {
-      console.log(err.name);
       if (err.name === 'CastError') {
         res.status(400).send({ message: 'Некорректно задан ID' });
       } else if (err.message === 'Пользователь не найден') {
