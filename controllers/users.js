@@ -15,7 +15,7 @@ module.exports.getUserById = (req, res) => {
     .catch((err) => {
       console.log(err.name);
       if (err.name === 'CastError') {
-        res.status(400).send({ message: 'Некорректно задан ID' })
+        res.status(400).send({ message: 'Некорректно задан ID' });
       } else if (err.message === 'Пользователь не найден') {
         res.status(404).send({ message: 'Пользователь по указанному id не найден' });
       } else {
@@ -67,9 +67,10 @@ module.exports.updateUserInfo = (req, res) => {
 };
 
 module.exports.updateAvatar = (req, res) => {
+  const { avatar } = req.body;
   User.findByIdAndUpdate(
     req.user._id,
-    { avatar: 'futureUrl' },
+    { avatar },
     {
       new: true,
       runValidators: true,
