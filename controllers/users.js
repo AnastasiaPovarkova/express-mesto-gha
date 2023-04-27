@@ -1,10 +1,28 @@
 const jwt = require('jsonwebtoken');
+const bcrypt = require('bcryptjs');
 const User = require('../models/user');
 
 module.exports.getUsers = (req, res) => {
   User.find({})
     .then((users) => res.send({ data: users }))
     .catch(() => res.status(500).send({ message: 'Произошла ошибка' }));
+};
+
+module.exports.aboutUser = (req, res) => {
+  User.findById({ _id: req.user._id })
+    .orFail(() => {
+      throw new Error('Пользователь не найден');
+    })
+    .then((user) => res.send({ data: user }))
+    .catch((err) => {
+      if (err.name === 'CastError') {
+        res.status(400).send({ message: 'Некорректно задан ID' });
+      } else if (err.message === 'Пользователь не найден') {
+        res.status(404).send({ message: 'Пользователь по указанному id не найден1' });
+      } else {
+        res.status(500).send({ message: 'Произошла ошибка' });
+      }
+    });
 };
 
 module.exports.getUserById = (req, res) => {
@@ -33,7 +51,7 @@ module.exports.login = (req, res) => {
       res.status(201).cookie('jwt', token, {
         maxAge: 3600000 * 24 * 7,
         httpOnly: true,
-      });
+      }).send({ email });
     })
     .catch((err) => {
       res.status(401).send({ message: err.message }); // ошибка аутентификации
@@ -45,10 +63,17 @@ module.exports.createUser = (req, res) => {
     name, about, avatar, email, password,
   } = req.body;
 
-  User.create({
-    name, about, avatar, email, password,
-  })
-    .then((user) => res.status(201).send({ data: user }))
+  bcrypt.hash(password, 10)
+    .then((hash) => User.create({
+      name,
+      about,
+      avatar,
+      email,
+      password: hash,
+    }))
+    .then((user) => {
+      res.status(201).send({ data: user });
+    })
     .catch((err) => {
       if (err.name === 'ValidationError') {
         const message = Object.values(err.errors).map((error) => error.message).join('; ');
