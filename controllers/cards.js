@@ -26,18 +26,26 @@ module.exports.createCard = (req, res) => {
 };
 
 module.exports.deleteCardById = (req, res) => {
-  Card.findByIdAndRemove({ _id: req.params.cardId })
-    .orFail(() => {
-      throw new Error('Карточка не найдена');
-    })
-    .then((card) => res.send({ data: card }))
-    .catch((err) => {
-      if (err.name === 'CastError') {
-        res.status(400).send({ message: 'Некорректно задан ID карточки' });
-      } else if (err.message === 'Карточка не найдена') {
-        res.status(404).send({ message: 'Карточка по указанному id не найдена' });
+  Card.findById({ _id: req.params.cardId })
+    .populate(['owner', 'likes'])
+    .then((cards) => {
+      if (!(req.user._id === cards.owner._id.toString())) {
+        res.status(404).send({ message: 'Запрещено удалять чужие карточки' });
       } else {
-        res.status(500).send({ message: 'Произошла ошибка' });
+        Card.findByIdAndRemove({ _id: req.params.cardId })
+          .orFail(() => {
+            throw new Error('Карточка не найдена');
+          })
+          .then((card) => res.send({ data: card }))
+          .catch((err) => {
+            if (err.name === 'CastError') {
+              res.status(400).send({ message: 'Некорректно задан ID карточки' });
+            } else if (err.message === 'Карточка не найдена') {
+              res.status(404).send({ message: 'Карточка по указанному id не найдена' });
+            } else {
+              res.status(500).send({ message: 'Произошла ошибка' });
+            }
+          });
       }
     });
 };
