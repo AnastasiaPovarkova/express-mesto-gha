@@ -9,7 +9,7 @@ router.get('/', getUsers);
 router.get('/me', aboutUser);
 router.get('/:userId', celebrate({
   body: Joi.object().keys({
-    userId: Joi.ObjectId().required(),
+    userId: Joi.string().required().regex(/^[0-9a-fA-F]{24}$/),
   }),
 }), getUserById);
 router.patch('/me', celebrate({
