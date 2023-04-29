@@ -25,7 +25,8 @@ const userSchema = new mongoose.Schema(
         default: 'https://pictures.s3.yandex.net/resources/jacques-cousteau_1604399756.png',
         // validate: {
         //   validator: function (value) {
-        //     const urlPattern = /(http|https):\/\/(\w+:{0,1}\w*#)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&amp;%#!\-/]))?/;
+        //     const urlPattern = 1;
+        // /(http|https):\/\/(\w+:{0,1}\w*#)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&amp;%#!\-/]))?/;
         //     const urlRegExp = new RegExp(urlPattern);
         //     return value.match(urlRegExp);
         //   },
