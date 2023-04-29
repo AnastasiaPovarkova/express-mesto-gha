@@ -28,6 +28,21 @@ app.use('/cards', require('./routes/cards'));
 
 app.use('*', (req, res) => res.status(404).send({ message: 'Страница не найдена.' }));
 
+app.use((err, req, res, next) => {
+  const { message } = err;
+  const statusCode = err.statusCode || 500;
+  console.log('err: ', err);
+
+  res
+    .status(statusCode)
+    .send({
+      message: statusCode === 500
+        ? 'На сервере произошла ошибка'
+        : message,
+    });
+  next();
+});
+
 app.listen(PORT, () => {
   console.log(`App listening on port ${PORT}`);
 });

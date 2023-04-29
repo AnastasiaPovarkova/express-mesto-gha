@@ -1,48 +1,52 @@
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const User = require('../models/user');
+const NotFoundError = require('../errors/not-found-err');
+const BadRequestError = require('../errors/bad-request-err');
+const UnauthorizedError = require('../errors/unauthorized-err');
+const ConflictError = require('../errors/conflict-err');
 
-module.exports.getUsers = (req, res) => {
+module.exports.getUsers = (req, res, next) => {
   User.find({})
     .then((users) => res.send({ data: users }))
-    .catch(() => res.status(500).send({ message: 'Произошла ошибка' }));
+    .catch(next);
 };
 
-module.exports.aboutUser = (req, res) => {
+module.exports.aboutUser = (req, res, next) => {
   User.findById({ _id: req.user._id })
-    .orFail(() => {
-      throw new Error('Пользователь не найден');
+    .then((user) => {
+      if (!user) {
+        throw new NotFoundError('Нет пользователя с таким id');
+      }
+      res.status(201).send({ data: user });
     })
-    .then((user) => res.send({ data: user }))
     .catch((err) => {
       if (err.name === 'CastError') {
-        res.status(400).send({ message: 'Некорректно задан ID' });
-      } else if (err.message === 'Пользователь не найден') {
-        res.status(404).send({ message: 'Пользователь по указанному id не найден1' });
+        next(new BadRequestError('Некорректно задан ID'));
       } else {
-        res.status(500).send({ message: 'Произошла ошибка' });
+        next(err);
       }
     });
 };
 
-module.exports.getUserById = (req, res) => {
+module.exports.getUserById = (req, res, next) => {
   User.findById({ _id: req.params.userId })
-    .orFail(() => {
-      throw new Error('Пользователь не найден');
+    .then((user) => {
+      if (!user) {
+        throw new NotFoundError('Нет пользователя с таким id');
+      }
+      res.status(201).send({ data: user });
     })
-    .then((user) => res.send({ data: user }))
     .catch((err) => {
       if (err.name === 'CastError') {
-        res.status(400).send({ message: 'Некорректно задан ID' });
-      } else if (err.message === 'Пользователь не найден') {
-        res.status(404).send({ message: 'Пользователь по указанному id не найден' });
+        next(new BadRequestError('Некорректно задан ID'));
       } else {
-        res.status(500).send({ message: 'Произошла ошибка' });
+        next(err);
       }
     });
 };
 
-module.exports.login = (req, res) => {
+module.exports.login = (req, res, next) => {
   const { email, password } = req.body;
 
   return User.findUserByCredentials(email, password)
@@ -54,11 +58,12 @@ module.exports.login = (req, res) => {
       }).send({ email });
     })
     .catch((err) => {
-      res.status(401).send({ message: err.message }); // ошибка аутентификации
+      next(new UnauthorizedError(err.message));
+      // res.status(401).send({ message: err.message }); // ошибка аутентификации
     });
 };
 
-module.exports.createUser = (req, res) => {
+module.exports.createUser = (req, res, next) => {
   const {
     name, about, avatar, email, password,
   } = req.body;
@@ -77,14 +82,16 @@ module.exports.createUser = (req, res) => {
     .catch((err) => {
       if (err.name === 'ValidationError') {
         const message = Object.values(err.errors).map((error) => error.message).join('; ');
-        res.status(400).send({ message });
+        next(new BadRequestError(message));
+      } else if (err.code === 11000) {
+        next(new ConflictError('Email уже зарегистрирован'));
       } else {
-        res.status(500).send({ message: 'Произошла ошибка' });
+        next(err);
       }
     });
 };
 
-module.exports.updateUserInfo = (req, res) => {
+module.exports.updateUserInfo = (req, res, next) => {
   const { name, about } = req.body;
   User.findByIdAndUpdate(
     req.user._id,
@@ -94,25 +101,25 @@ module.exports.updateUserInfo = (req, res) => {
       runValidators: true, // данные будут валидированы перед изменением
     },
   )
-    .orFail(() => {
-      throw new Error('Пользователь не найден');
+    .then((user) => {
+      if (!user) {
+        throw new NotFoundError('Пользователь по указанному id не найден');
+      }
+      res.send({ data: user });
     })
-    .then((user) => res.send({ data: user }))
     .catch((err) => {
       if (err.name === 'CastError') {
-        res.status(400).send({ message: 'Некорректно задан ID' });
-      } else if (err.message === 'Пользователь не найден') {
-        res.status(404).send({ message: 'Пользователь по указанному id не найден' });
+        next(new BadRequestError('Некорректно задан ID'));
       } else if (err.name === 'ValidationError') {
         const message = Object.values(err.errors).map((error) => error.message).join('; ');
-        res.status(400).send({ message });
+        next(new BadRequestError(message));
       } else {
-        res.status(500).send({ message: 'Произошла ошибка' });
+        next(err);
       }
     });
 };
 
-module.exports.updateAvatar = (req, res) => {
+module.exports.updateAvatar = (req, res, next) => {
   const { avatar } = req.body;
   User.findByIdAndUpdate(
     req.user._id,
@@ -122,20 +129,20 @@ module.exports.updateAvatar = (req, res) => {
       runValidators: true,
     },
   )
-    .orFail(() => {
-      throw new Error('Пользователь не найден');
+    .then((user) => {
+      if (!user) {
+        throw new NotFoundError('Пользователь по указанному id не найден');
+      }
+      res.send({ data: user });
     })
-    .then((user) => res.send({ data: user }))
     .catch((err) => {
       if (err.name === 'CastError') {
-        res.status(400).send({ message: 'Некорректно задан ID' });
-      } else if (err.message === 'Пользователь не найден') {
-        res.status(404).send({ message: 'Пользователь по указанному id не найден' });
+        next(new BadRequestError('Некорректно задан ID'));
       } else if (err.name === 'ValidationError') {
         const message = Object.values(err.errors).map((error) => error.message).join('; ');
-        res.status(400).send({ message });
+        next(new BadRequestError(message));
       } else {
-        res.status(500).send({ message: 'Произошла ошибка' });
+        next(err);
       }
     });
 };
