@@ -32,7 +32,9 @@ module.exports.deleteCardById = (req, res, next) => {
   Card.findById({ _id: req.params.cardId })
     .populate(['owner', 'likes'])
     .then((cards) => {
-      if (!(req.user._id === cards.owner._id.toString())) {
+      if (!cards) {
+        throw new NotFoundError('Карточка не найдена');
+      } else if (!(req.user._id === cards.owner._id.toString())) {
         throw new ForbiddenError('Запрещено удалять чужие карточки');
       } else {
         Card.findByIdAndRemove({ _id: req.params.cardId })
@@ -43,6 +45,7 @@ module.exports.deleteCardById = (req, res, next) => {
             res.status(200).send({ data: card });
           })
           .catch((err) => {
+            console.log('err.name: ', err.name);
             if (err.name === 'CastError') {
               next(new BadRequestError('Некорректно задан ID карточки'));
             } else {
