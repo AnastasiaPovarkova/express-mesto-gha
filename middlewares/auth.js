@@ -6,7 +6,6 @@ module.exports = (req, res, next) => {
 
   if (!jwt) {
     return next(new UnauthorizedError('Нет jwt'));
-    // return res.status(401).send({ message: 'Нет jwt' });
   }
 
   let payload;
@@ -15,7 +14,6 @@ module.exports = (req, res, next) => {
     payload = token.verify(jwt, 'super-strong-secret');
   } catch (err) {
     return next(new UnauthorizedError('Необходима авторизация'));
-    // return res.status(401).send({ message: 'Необходима авторизация' });
   }
 
   req.user = payload; // записываем пейлоуд в объект запроса
