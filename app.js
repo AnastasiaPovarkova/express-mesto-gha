@@ -2,6 +2,8 @@ const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
+const { celebrate, Joi } = require('celebrate');
+const { errors } = require('celebrate');
 
 const { PORT = 3000 } = process.env;
 const app = express();
@@ -18,8 +20,21 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 app.use(cookieParser());
 
-app.post('/signin', login);
-app.post('/signup', createUser);
+app.post('/signin', celebrate({
+  body: Joi.object().keys({
+    email: Joi.string().required().email(),
+    password: Joi.string().required().min(8),
+  }),
+}), login);
+app.post('/signup', celebrate({
+  body: Joi.object().keys({
+    email: Joi.string().required().email(),
+    password: Joi.string().required().min(8),
+    name: Joi.string().min(2).max(30),
+    about: Joi.string().min(2).max(30),
+    avatar: Joi.string(),
+  }),
+}), createUser);
 
 app.use(auth);
 
@@ -27,6 +42,8 @@ app.use('/users', require('./routes/users'));
 app.use('/cards', require('./routes/cards'));
 
 app.use('*', (req, res) => res.status(404).send({ message: 'Страница не найдена.' }));
+
+app.use(errors()); // обработчик ошибок celebrate
 
 app.use((err, req, res, next) => {
   const { message } = err;
