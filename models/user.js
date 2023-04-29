@@ -1,5 +1,5 @@
-// const validator = require('validator');
 const isEmail = require('validator/lib/isEmail');
+const isURL = require('validator/lib/isURL');
 const bcrypt = require('bcryptjs');
 
 const mongoose = require('mongoose');
@@ -19,21 +19,11 @@ const userSchema = new mongoose.Schema(
       minlength: [2, 'Минимальная длина поля "name" - 2'],
       maxlength: [30, 'Максимальная длина поля "name" - 30'],
     },
-    avatar: [
-      {
-        type: String,
-        default: 'https://pictures.s3.yandex.net/resources/jacques-cousteau_1604399756.png',
-        // validate: {
-        //   validator: function (value) {
-        //     const urlPattern = 1;
-        // /(http|https):\/\/(\w+:{0,1}\w*#)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&amp;%#!\-/]))?/;
-        //     const urlRegExp = new RegExp(urlPattern);
-        //     return value.match(urlRegExp);
-        //   },
-        //   message: 'Введена некорректная ссылка',
-        // },
-      },
-    ],
+    avatar: {
+      type: String,
+      default: 'https://pictures.s3.yandex.net/resources/jacques-cousteau_1604399756.png',
+      validate: [isURL, 'Поле "email" неверно заполнено'],
+    },
     email: {
       type: String,
       required: [true, 'Поле "email" должно быть заполнено'],
