@@ -14,19 +14,13 @@ router.post('/', celebrate({
   }),
 }), createCard);
 router.delete('/:cardId', celebrate({
-  body: Joi.object().keys({
-    _id: Joi.objectId(),
-  }),
+  cardId: Joi.objectId(),
 }), deleteCardById);
 router.put('/:cardId/likes', celebrate({
-  body: Joi.object().keys({
-    _id: Joi.objectId(),
-  }),
+  cardId: Joi.objectId(),
 }), likeCard);
 router.delete('/:cardId/likes', celebrate({
-  body: Joi.object().keys({
-    _id: Joi.objectId(),
-  }),
+  cardId: Joi.objectId(),
 }), dislikeCard);
 
 module.exports = router;

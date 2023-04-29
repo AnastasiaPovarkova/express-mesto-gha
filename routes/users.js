@@ -9,9 +9,7 @@ const {
 router.get('/', getUsers);
 router.get('/me', aboutUser);
 router.get('/:userId', celebrate({
-  body: Joi.object().keys({
-    _id: Joi.objectId(),
-  }),
+  userId: Joi.objectId(),
 }), getUserById);
 router.patch('/me', celebrate({
   body: Joi.object().keys({
