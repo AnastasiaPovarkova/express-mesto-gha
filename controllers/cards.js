@@ -45,7 +45,6 @@ module.exports.deleteCardById = (req, res, next) => {
             res.status(200).send({ data: card });
           })
           .catch((err) => {
-            console.log('err.name: ', err.name);
             if (err.name === 'CastError') {
               next(new BadRequestError('Некорректно задан ID карточки'));
             } else {
