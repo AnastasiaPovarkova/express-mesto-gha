@@ -31,18 +31,15 @@ module.exports.createCard = (req, res, next) => {
 module.exports.deleteCardById = (req, res, next) => {
   Card.findById({ _id: req.params.cardId })
     .populate(['owner', 'likes'])
-    .then((cards) => {
-      if (!cards) {
+    .then((card) => {
+      if (!card) {
         throw new NotFoundError('Карточка не найдена');
-      } else if (!(req.user._id === cards.owner._id.toString())) {
+      } else if (!(req.user._id === card.owner._id.toString())) {
         throw new ForbiddenError('Запрещено удалять чужие карточки');
       } else {
-        Card.findByIdAndRemove({ _id: req.params.cardId })
-          .then((card) => {
-            if (!card) {
-              throw new NotFoundError('Карточка не найдена');
-            }
-            res.status(200).send({ data: card });
+        card.deleteOne()
+          .then((myCard) => {
+            res.status(200).send({ data: myCard });
           })
           .catch((err) => {
             if (err.name === 'CastError') {
@@ -71,9 +68,6 @@ module.exports.likeCard = (req, res, next) => {
     .catch((err) => {
       if (err.name === 'CastError') {
         next(new BadRequestError('Некорректно задан ID карточки'));
-      } else if (err.name === 'ValidationError') {
-        const message = Object.values(err.errors).map((error) => error.message).join('; ');
-        next(new BadRequestError(message));
       } else {
         next(err);
       }
@@ -95,9 +89,6 @@ module.exports.dislikeCard = (req, res, next) => {
     .catch((err) => {
       if (err.name === 'CastError') {
         next(new BadRequestError('Некорректно задан ID карточки'));
-      } else if (err.name === 'ValidationError') {
-        const message = Object.values(err.errors).map((error) => error.message).join('; ');
-        next(new BadRequestError(message));
       } else {
         next(err);
       }
