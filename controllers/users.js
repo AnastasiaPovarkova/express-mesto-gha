@@ -3,7 +3,6 @@ const bcrypt = require('bcryptjs');
 const User = require('../models/user');
 const NotFoundError = require('../errors/not-found-err');
 const BadRequestError = require('../errors/bad-request-err');
-const UnauthorizedError = require('../errors/unauthorized-err');
 const ConflictError = require('../errors/conflict-err');
 
 module.exports.getUsers = (req, res, next) => {
@@ -20,13 +19,7 @@ module.exports.aboutUser = (req, res, next) => {
       }
       res.status(200).send({ data: user });
     })
-    .catch((err) => {
-      if (err.name === 'CastError') {
-        next(new BadRequestError('Некорректно задан ID'));
-      } else {
-        next(err);
-      }
-    });
+    .catch(next);
 };
 
 module.exports.getUserById = (req, res, next) => {
@@ -37,13 +30,7 @@ module.exports.getUserById = (req, res, next) => {
       }
       res.status(200).send({ data: user });
     })
-    .catch((err) => {
-      if (err.name === 'CastError') {
-        next(new BadRequestError('Некорректно задан ID'));
-      } else {
-        next(err);
-      }
-    });
+    .catch(next);
 };
 
 module.exports.login = (req, res, next) => {
@@ -57,9 +44,7 @@ module.exports.login = (req, res, next) => {
         httpOnly: true,
       }).send({ email });
     })
-    .catch((err) => {
-      next(new UnauthorizedError(err.message));
-    });
+    .catch(next);
 };
 
 module.exports.createUser = (req, res, next) => {
@@ -76,12 +61,7 @@ module.exports.createUser = (req, res, next) => {
       password: hash,
     }))
     .then((user) => {
-      res.status(200).send({
-        name: user.name,
-        about: user.about,
-        avatar: user.avatar,
-        email: user.email,
-      });
+      res.status(200).send({ data: user });
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
@@ -112,9 +92,7 @@ module.exports.updateUserInfo = (req, res, next) => {
       res.send({ data: user });
     })
     .catch((err) => {
-      if (err.name === 'CastError') {
-        next(new BadRequestError('Некорректно задан ID'));
-      } else if (err.name === 'ValidationError') {
+      if (err.name === 'ValidationError') {
         const message = Object.values(err.errors).map((error) => error.message).join('; ');
         next(new BadRequestError(message));
       } else {
@@ -140,9 +118,7 @@ module.exports.updateAvatar = (req, res, next) => {
       res.send({ data: user });
     })
     .catch((err) => {
-      if (err.name === 'CastError') {
-        next(new BadRequestError('Некорректно задан ID'));
-      } else if (err.name === 'ValidationError') {
+      if (err.name === 'ValidationError') {
         const message = Object.values(err.errors).map((error) => error.message).join('; ');
         next(new BadRequestError(message));
       } else {

@@ -38,6 +38,12 @@ const userSchema = new mongoose.Schema(
   },
   {
     versionKey: false,
+    toJSON: {
+      useProjection: true,
+    },
+    toObject: {
+      useProjection: true,
+    },
   },
 );
 
