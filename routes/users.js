@@ -1,7 +1,7 @@
 const router = require('express').Router();
 const { celebrate, Joi } = require('celebrate');
 Joi.objectId = require('joi-objectid')(Joi);
-const { urlRegular } = require('../consts/constants');
+const { urlRegular } = require('../config/constants');
 
 const {
   getUsers, aboutUser, getUserById, updateUserInfo, updateAvatar,
