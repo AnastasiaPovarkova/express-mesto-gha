@@ -12,8 +12,8 @@ module.exports.getUsers = (req, res, next) => {
     .catch(next);
 };
 
-module.exports.aboutUser = (req, res, next) => {
-  User.findById({ _id: req.user._id })
+function findByIdDecorator(id, res, next) {
+  User.findById(id)
     .then((user) => {
       if (!user) {
         throw new NotFoundError('Нет пользователя с таким id');
@@ -21,17 +21,16 @@ module.exports.aboutUser = (req, res, next) => {
       res.status(200).send({ data: user });
     })
     .catch(next);
+}
+
+module.exports.aboutUser = (req, res, next) => {
+  const { _id } = req.user;
+  findByIdDecorator(_id, res, next);
 };
 
 module.exports.getUserById = (req, res, next) => {
-  User.findById({ _id: req.params.userId })
-    .then((user) => {
-      if (!user) {
-        throw new NotFoundError('Нет пользователя с таким id');
-      }
-      res.status(200).send({ data: user });
-    })
-    .catch(next);
+  const _id = req.params.userId;
+  findByIdDecorator(_id, res, next);
 };
 
 module.exports.login = (req, res, next) => {
