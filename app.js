@@ -9,6 +9,7 @@ const app = express();
 
 const { login, createUser } = require('./controllers/users');
 const auth = require('./middlewares/auth');
+const centralizedErrorHandler = require('./middlewares/centralizedErrorHandler');
 const NotFoundError = require('./errors/not-found-err');
 const { urlRegular } = require('./consts/constants');
 
@@ -46,19 +47,7 @@ app.use('*', (req, res, next) => next(new NotFoundError('Страница не �
 
 app.use(errors()); // обработчик ошибок celebrate
 
-app.use((err, req, res, next) => {
-  const { message } = err;
-  const statusCode = err.statusCode || 500;
-
-  res
-    .status(statusCode)
-    .send({
-      message: statusCode === 500
-        ? 'На сервере произошла ошибка'
-        : message,
-    });
-  next();
-});
+app.use(centralizedErrorHandler);
 
 app.listen(PORT, () => {
   console.log(`App listening on port ${PORT}`);
