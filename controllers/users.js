@@ -75,11 +75,11 @@ module.exports.createUser = (req, res, next) => {
     });
 };
 
-module.exports.updateUserInfo = (req, res, next) => {
-  const { name, about } = req.body;
+function updateUserInfoDecorator(data, req, res, next) {
+  const { name, about, avatar } = data;
   User.findByIdAndUpdate(
     req.user._id,
-    { name, about },
+    { name, about, avatar },
     {
       new: true, // обработчик then получит на вход обновлённую запись
       runValidators: true, // данные будут валидированы перед изменением
@@ -99,30 +99,14 @@ module.exports.updateUserInfo = (req, res, next) => {
         next(err);
       }
     });
+}
+
+module.exports.updateUserInfo = (req, res, next) => {
+  const { name, about } = req.body;
+  updateUserInfoDecorator({ name, about }, req, res, next);
 };
 
 module.exports.updateAvatar = (req, res, next) => {
   const { avatar } = req.body;
-  User.findByIdAndUpdate(
-    req.user._id,
-    { avatar },
-    {
-      new: true,
-      runValidators: true,
-    },
-  )
-    .then((user) => {
-      if (!user) {
-        throw new NotFoundError('Пользователь по указанному id не найден');
-      }
-      res.send({ data: user });
-    })
-    .catch((err) => {
-      if (err instanceof mongoose.Error.ValidationError) {
-        const message = Object.values(err.errors).map((error) => error.message).join('; ');
-        next(new BadRequestError(message));
-      } else {
-        next(err);
-      }
-    });
+  updateUserInfoDecorator({ avatar }, req, res, next);
 };
