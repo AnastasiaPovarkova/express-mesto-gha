@@ -1,5 +1,6 @@
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
+const mongoose = require('mongoose');
 const User = require('../models/user');
 const NotFoundError = require('../errors/not-found-err');
 const BadRequestError = require('../errors/bad-request-err');
@@ -64,7 +65,7 @@ module.exports.createUser = (req, res, next) => {
       res.status(200).send({ data: user });
     })
     .catch((err) => {
-      if (err.name === 'ValidationError') {
+      if (err instanceof mongoose.Error.ValidationError) {
         const message = Object.values(err.errors).map((error) => error.message).join('; ');
         next(new BadRequestError(message));
       } else if (err.code === 11000) {
@@ -92,7 +93,7 @@ module.exports.updateUserInfo = (req, res, next) => {
       res.send({ data: user });
     })
     .catch((err) => {
-      if (err.name === 'ValidationError') {
+      if (err instanceof mongoose.Error.ValidationError) {
         const message = Object.values(err.errors).map((error) => error.message).join('; ');
         next(new BadRequestError(message));
       } else {
@@ -118,7 +119,7 @@ module.exports.updateAvatar = (req, res, next) => {
       res.send({ data: user });
     })
     .catch((err) => {
-      if (err.name === 'ValidationError') {
+      if (err instanceof mongoose.Error.ValidationError) {
         const message = Object.values(err.errors).map((error) => error.message).join('; ');
         next(new BadRequestError(message));
       } else {
