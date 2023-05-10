@@ -11,6 +11,12 @@ const cors = require('../middlewares/cors');
 
 const { JoiBodyEmailPassword, JoiBodyEmailPasswordNameAboutAvatar } = require('../config/validationConstants');
 
+router.get('/crash-test', () => {
+  setTimeout(() => {
+    throw new Error('Сервер сейчас упадёт');
+  }, 0);
+});
+
 router.post('/signin', celebrate(JoiBodyEmailPassword), login);
 router.post('/signup', celebrate(JoiBodyEmailPasswordNameAboutAvatar), createUser);
 

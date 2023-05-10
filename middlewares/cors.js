@@ -3,6 +3,7 @@ const allowedCors = [
   'http://praktikum.tk',
   'localhost:3000',
   '127.0.0.1:3000',
+  'mestofront.anstpov.nomoredomains.monster',
 ];
 
 module.exports = (req, res, next) => {
