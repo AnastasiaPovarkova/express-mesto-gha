@@ -1,4 +1,4 @@
-[![Tests](../../actions/workflows/tests-13-sprint.yml/badge.svg)](../../actions/workflows/tests-13-sprint.yml) [![Tests](../../actions/workflows/tests-14-sprint.yml/badge.svg)](../../actions/workflows/tests-14-sprint.yml)
+[![Tests](../../actions/workflows/tests-14-sprint.yml/badge.svg)](../../actions/workflows/tests-14-sprint.yml)
 # Проект Mesto бэкенд
 
 
@@ -7,8 +7,7 @@
 `/routes` — папка с файлами роутера  
 `/controllers` — папка с файлами контроллеров пользователя и карточки   
 `/models` — папка с файлами описания схем пользователя и карточки  
-  
-Остальные директории вспомогательные, создаются при необходимости разработчиком
+`/middlewares` — папка с middleware-компонентами auth, CORS, Logger и Централизованного обработчика ошибок
 
 ## Запуск проекта
 
@@ -18,3 +17,7 @@
 ## GH Pages
 
 ### [Ссылка на GitHub Pages](https://anastasiapovarkova.github.io/express-mesto-gha/)
+
+<!--
+[![Tests](../../actions/workflows/tests-13-sprint.yml/badge.svg)](../../actions/workflows/tests-13-sprint.yml)
+-->
