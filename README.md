@@ -1,6 +1,8 @@
 [![Tests](../../actions/workflows/tests-14-sprint.yml/badge.svg)](../../actions/workflows/tests-14-sprint.yml)
 # Проект Mesto бэкенд
 
+#### Статус: сделано :white_check_mark:
+
 
 ## Директории
 
